@@ -11,20 +11,31 @@ class OutcomeType(Enum):
     BOUNTIED_QUESTION = "BOUNTIED_QUESTION"
 
 
-class CreateBaseMarket(TypedDict):
+class CreateMarket:
     outcomeType: OutcomeType
     question: str
 
 
-class CreateBinaryMarket(CreateBaseMarket):
-    initialProb: int
+class CreateBinaryMarket(CreateMarket):
+    def __init__(self, question: str, initialProb: int):
+        super().__init__(outcomeType=OutcomeType.BINARY, question=question)
+        self.initialProb = initialProb
 
 
-class CreatePseudoNumericMarket(CreateBaseMarket):
-    min: float
-    max: float
-    isLogScale: bool
-    initialValue: float
+class CreatePseudoNumericMarket(CreateMarket):
+    def __init__(
+        self,
+        question: str,
+        min: float,
+        max: float,
+        isLogScale: bool,
+        initialValue: float,
+    ):
+        super().__init__(outcomeType=OutcomeType.PSEUDO_NUMERIC, question=question)
+        self.min = min
+        self.max = max
+        self.isLogScale = isLogScale
+        self.initialValue = initialValue
 
 
 class AddAnswersMode(Enum):
@@ -33,20 +44,28 @@ class AddAnswersMode(Enum):
     ANYONE = "DISABLED"
 
 
-class CreateMultipleChoiceMarket(CreateBaseMarket):
-    answers: list[str]
-    addAnswersMode: AddAnswersMode
+class CreateMultipleChoiceMarket(CreateMarket):
+    def __init__(
+        self, question: str, answers: list[str], addAnswersMode: AddAnswersMode
+    ):
+        super().__init__(outcomeType=OutcomeType.MULTIPLE_CHOICE, question=question)
+        self.answers = answers
+        self.addAnswersMode = addAnswersMode
 
 
-class CreateBountiedQuestionMarket(CreateBaseMarket):
-    totalBounty: int
+class CreatePollMarket(CreateMarket):
+    def __init__(self, question: str, answers: list[str]):
+        super().__init__(outcomeType=OutcomeType.POLL, question=question)
+        self.answers = answers
 
 
-class CreatePollMarket(CreateBaseMarket):
-    answers: list[str]
+class CreateBountiedQuestionMarket(CreateMarket):
+    def __init__(self, question: str, totalBounty: int):
+        super().__init__(outcomeType=OutcomeType.BOUNTIED_QUESTION, question=question)
+        self.totalBounty = totalBounty
 
 
-MarketCreationRequest = (
+CreateMarketRequest = (
     CreateBinaryMarket
     | CreatePseudoNumericMarket
     | CreateMultipleChoiceMarket
@@ -59,7 +78,7 @@ class Client:
     def __init__(self, api_key: str):
         self.api_key = api_key
 
-    def create_market(self, market: MarketCreationRequest):
+    def create_market(self, market: CreateMarketRequest):
         return requests.post(
             "https://api.manifold.markets/v0/market",
             json=market,
