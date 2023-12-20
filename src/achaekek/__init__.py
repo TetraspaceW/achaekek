@@ -14,9 +14,11 @@ class OutcomeType(Enum):
 
 @dataclass(kw_only=True)
 class CreateMarket:
-    outcomeType: OutcomeType
     question: str
     closeTime: datetime = None
+
+    def to_json(self):
+        return self.__dict__
 
 
 @dataclass
@@ -77,6 +79,6 @@ class Client:
     def create_market(self, market: CreateMarketRequest):
         return requests.post(
             "https://api.manifold.markets/v0/market",
-            json=market,
+            json=market.to_json(),
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
