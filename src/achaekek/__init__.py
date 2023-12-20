@@ -1,6 +1,7 @@
 import requests
-from typing import TypedDict
 from enum import Enum
+from datetime import datetime
+from dataclasses import dataclass
 
 
 class OutcomeType(Enum):
@@ -11,31 +12,27 @@ class OutcomeType(Enum):
     BOUNTIED_QUESTION = "BOUNTIED_QUESTION"
 
 
+@dataclass(kw_only=True)
 class CreateMarket:
     outcomeType: OutcomeType
     question: str
+    closeTime: datetime = None
 
 
+@dataclass
 class CreateBinaryMarket(CreateMarket):
-    def __init__(self, question: str, initialProb: int):
-        super().__init__(outcomeType=OutcomeType.BINARY, question=question)
-        self.initialProb = initialProb
+    initialProb: int
+    outcomeType = OutcomeType.BINARY
 
 
+@dataclass
 class CreatePseudoNumericMarket(CreateMarket):
-    def __init__(
-        self,
-        question: str,
-        min: float,
-        max: float,
-        isLogScale: bool,
-        initialValue: float,
-    ):
-        super().__init__(outcomeType=OutcomeType.PSEUDO_NUMERIC, question=question)
-        self.min = min
-        self.max = max
-        self.isLogScale = isLogScale
-        self.initialValue = initialValue
+    question: str
+    min: float
+    max: float
+    isLogScale: bool
+    initialValue: float
+    outcomeType = OutcomeType.PSEUDO_NUMERIC
 
 
 class AddAnswersMode(Enum):
@@ -44,25 +41,24 @@ class AddAnswersMode(Enum):
     ANYONE = "DISABLED"
 
 
+@dataclass
 class CreateMultipleChoiceMarket(CreateMarket):
-    def __init__(
-        self, question: str, answers: list[str], addAnswersMode: AddAnswersMode
-    ):
-        super().__init__(outcomeType=OutcomeType.MULTIPLE_CHOICE, question=question)
-        self.answers = answers
-        self.addAnswersMode = addAnswersMode
+    question: str
+    answers: list[str]
+    addAnswersMode: AddAnswersMode
+    outcomeType = OutcomeType.MULTIPLE_CHOICE
 
 
+@dataclass
 class CreatePollMarket(CreateMarket):
-    def __init__(self, question: str, answers: list[str]):
-        super().__init__(outcomeType=OutcomeType.POLL, question=question)
-        self.answers = answers
+    answers: list[str]
+    outcomeType = OutcomeType.POLL
 
 
+@dataclass
 class CreateBountiedQuestionMarket(CreateMarket):
-    def __init__(self, question: str, totalBounty: int):
-        super().__init__(outcomeType=OutcomeType.BOUNTIED_QUESTION, question=question)
-        self.totalBounty = totalBounty
+    totalBounty: int
+    outcomeType = OutcomeType.BOUNTIED_QUESTION
 
 
 CreateMarketRequest = (
