@@ -1,2 +1,3 @@
 # achaekek
-Manifold markets python API 
+
+Manifold markets Python API

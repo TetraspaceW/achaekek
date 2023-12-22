@@ -73,7 +73,7 @@ class CreatePseudoNumericMarket(_CreateMarket):
 class AddAnswersMode(Enum):
     DISABLED = "DISABLED"
     ONLY_CREATORS = "ONLY_CREATORS"
-    ANYONE = "DISABLED"
+    ANYONE = "ANYONE"
 
 
 @dataclass
