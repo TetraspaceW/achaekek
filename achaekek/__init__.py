@@ -1,1 +1,1 @@
-from achaekek import *
+from .achaekek import *

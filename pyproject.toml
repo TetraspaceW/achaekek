@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "achaekek"
-version = "0.0.3"
+version = "0.0.4"
 description = "Python library for the Manifold markets API."
 authors = ["TetraspaceW <holomanga@gmail.com>"]
 readme = "README.md"
