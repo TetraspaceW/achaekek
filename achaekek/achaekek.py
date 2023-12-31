@@ -137,6 +137,25 @@ class CreateBetRequest:
 
 @dataclass
 class GetMarketsRequest:
+    """
+    Request parameters for the get_markets method, to list all markets, defaulting to creation date descending.
+
+    Parameters
+    ----------
+    limit : int
+        Optional. The maximum number of markets to return.
+    sort : Literal["created-time", "updated-time", "last-bet-time", "last-comment-time"]
+        Optional. The timestamp to sort by. Default is creation time.
+    order : Literal["asc", "desc"]
+        Optional. The order to sort by. Default is descending.
+    before : str
+        Optional. The ID of the market before which the list will start.
+    userId : str
+        Optional. Include only markets created by this user.
+    groupId : str
+        Optional. Include only markets tagged with this topic.
+    """
+
     limit: int = None
     sort: Literal[
         "created-time", "updated-time", "last-bet-time", "last-comment-time"
@@ -217,7 +236,7 @@ class Client:
 
         Parameters
         ----------
-        market : { CreateBinaryMarket, CreatePseudoNumericMarket, CreateMultipleChoiceMarket, CreateBountiedQuestionMarket, CreatePollMarket }
+        market : CreateMarketRequest
             The market to create. Can be of any of the types supported by Manifold: binary (0% - 100%), pseudo-numeric (minimum to maximum), multiple choice, bountied question, or a poll question.
 
         Returns
@@ -254,3 +273,6 @@ class Client:
 
     def get_me(self) -> requests.Response:
         return self._get("/me")
+
+    def get_user(self, username: str) -> requests.Response:
+        return self._get(f"/user/{username}")
