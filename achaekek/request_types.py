@@ -13,11 +13,6 @@ class OutcomeType(Enum):
     BOUNTIED_QUESTION = "BOUNTIED_QUESTION"
 
 
-class Visibility(Enum):
-    PUBLIC = "public"
-    UNLISTED = "unlisted"
-
-
 class DescriptionFormat(Enum):
     HTML = "descriptionHTML"
     MARKDOWN = "descriptionMarkdown"
@@ -29,7 +24,7 @@ class _CreateMarket:
     question: str
     closeTime: datetime = None
     description: str | tuple[str, DescriptionFormat] = None
-    visibility: Visibility = None
+    visibility: Literal["public", "unlisted"] = None
     groupIds: list[str] = None
     extraLiquidity: int = None
 
@@ -70,18 +65,13 @@ class CreatePseudoNumericMarket(_CreateMarket):
     outcomeType: OutcomeType = field(default=OutcomeType.PSEUDO_NUMERIC)
 
 
-class AddAnswersMode(Enum):
-    DISABLED = "DISABLED"
-    ONLY_CREATORS = "ONLY_CREATORS"
-    ANYONE = "ANYONE"
-
-
 @dataclass
 class CreateMultipleChoiceMarket(_CreateMarket):
     question: str
     answers: list[str]
-    addAnswersMode: AddAnswersMode
+    addAnswersMode: Literal["DISABLED", "ONLY_CREATORS", "ANYONE"]
     outcomeType: OutcomeType = field(default=OutcomeType.MULTIPLE_CHOICE)
+    shouldAnswersSumToOne: bool = True
 
     def to_json(self):
         dictionary = super().to_json()
@@ -111,11 +101,6 @@ CreateMarketRequest = (
 )
 
 
-class Outcome(Enum):
-    YES = "YES"
-    NO = "NO"
-
-
 class RequestModel:
     def to_json(self):
         return {k: v for k, v in self.__dict__.items() if v is not None}
@@ -125,7 +110,7 @@ class RequestModel:
 class CreateBetRequest(RequestModel):
     amount: int
     contractId: str
-    outcome: Outcome = field(default=Outcome.YES)
+    outcome: Literal["YES", "NO"] = field(default="YES")
     limitprob: float = None
     expiresAt: datetime = None
 
