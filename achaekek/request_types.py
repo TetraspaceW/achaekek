@@ -30,7 +30,8 @@ class _CreateMarket:
 
     def to_json(self):
         """
-        Converts the create market request dataclass to a JSON dictionary suitable for sending as a request to the Manifold API, reformatting the close time and description as needed.
+        Converts the create market request dataclass to a JSON dictionary suitable for sending as a request to the
+        Manifold API, reformatting the close time and description as needed.
 
         Returns
         -------
@@ -77,6 +78,8 @@ class CreateMultipleChoiceMarket(_CreateMarket):
         dictionary = super().to_json()
         if "addAnswersMode" in dictionary:
             dictionary["addAnswersMode"] = dictionary["addAnswersMode"].value
+        if "shouldAnswersSumToOne" in dictionary and dictionary["shouldAnswersSumToOne"]:
+            del dictionary["shouldAnswersSumToOne"]
         return dictionary
 
 
