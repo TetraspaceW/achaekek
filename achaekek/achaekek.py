@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any
 import requests
+import logging
 
 from .request_types import (
     AwardBountyRequest,
@@ -25,24 +26,26 @@ from .request_types import (
 
 
 class Client:
-    API_ROOT = "https://api.manifold.markets/v0"
-
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, api_url: str = "https://api.manifold.markets/v0"):
         """
         Creates a new Manifold client with a given API key.
 
         Parameters
         ----------
         api_key : str
-            Your Manifold API key, which can be found at https://manifold.markets/profile.
+            Your Manifold API key, which can be found in the settings on your profile.
+        api_url : str, optional
+            The URL of the Manifold API. Defaults to the current production Manifold API domain, "https://api.manifold.markets/v0".
         """
+        self.api_url = api_url
         self.api_key = api_key
 
     def _get(
         self, endpoint: str, params: RequestModel = RequestModel()
     ) -> requests.Response:
+        logging.info(f"GETting from {self.api_url}{endpoint} with {params.to_json()}")
         return requests.get(
-            f"{self.API_ROOT}{endpoint}",
+            f"{self.api_url}{endpoint}",
             params=params.to_json(),
             headers={"Authorization": f"Key {self.api_key}"},
         )
@@ -50,8 +53,9 @@ class Client:
     def _post(
         self, endpoint: str, request: RequestModel = RequestModel()
     ) -> requests.Response:
+        logging.info(f"POSTing to {self.api_url}{endpoint} with {request.to_json()}")
         return requests.post(
-            f"{self.API_ROOT}{endpoint}",
+            f"{self.api_url}{endpoint}",
             json=request.to_json(),
             headers={"Authorization": f"Key {self.api_key}"},
         )

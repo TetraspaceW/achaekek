@@ -70,7 +70,7 @@ class CreatePseudoNumericMarket(_CreateMarket):
 class CreateMultipleChoiceMarket(_CreateMarket):
     question: str
     answers: list[str]
-    addAnswersMode: Literal["DISABLED", "ONLY_CREATORS", "ANYONE"]
+    addAnswersMode: Literal["DISABLED", "ONLY_CREATOR", "ANYONE"] = "DISABLED"
     outcomeType: OutcomeType = field(default=OutcomeType.MULTIPLE_CHOICE)
     shouldAnswersSumToOne: bool = True
 
