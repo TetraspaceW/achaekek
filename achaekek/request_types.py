@@ -76,9 +76,10 @@ class CreateMultipleChoiceMarket(_CreateMarket):
 
     def to_json(self):
         dictionary = super().to_json()
-        if "addAnswersMode" in dictionary:
-            dictionary["addAnswersMode"] = dictionary["addAnswersMode"].value
-        if "shouldAnswersSumToOne" in dictionary and dictionary["shouldAnswersSumToOne"]:
+        if (
+            "shouldAnswersSumToOne" in dictionary
+            and dictionary["shouldAnswersSumToOne"]
+        ):
             del dictionary["shouldAnswersSumToOne"]
         return dictionary
 
@@ -119,7 +120,6 @@ class CreateBetRequest(RequestModel):
 
     def to_json(self):
         json = super.to_json()
-        json["outcome"] = json["outcome"].value
         if "limitprob" in json:
             json["limitprob"] = round(json["limitprob"], 2)
         if "expiresAt" in json:
