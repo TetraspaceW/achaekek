@@ -119,7 +119,7 @@ class CreateBetRequest(RequestModel):
     expiresAt: datetime = None
 
     def to_json(self):
-        json = super.to_json()
+        json = super().to_json()
         if "limitprob" in json:
             json["limitprob"] = round(json["limitprob"], 2)
         if "expiresAt" in json:
@@ -200,7 +200,7 @@ class GetGroupsRequest(RequestModel):
     availableToUserId: str = None
 
     def to_json(self):
-        json = super.to_json()
+        json = super().to_json()
         if "beforeTime" in json:
             json["beforeTime"] = int(time.mktime(self.beforeTime.timetuple()) * 1000)
         return json
@@ -250,9 +250,12 @@ class ResolveMultipleChoiceMarket(RequestModel):
     resolutions: list[MultipleChoiceResolution] = None
 
     def to_json(self):
-        json = super.to_json()
+        json = super().to_json()
         if "resolutions" in json:
-            json["resolutions"] = [r.__dict__ for r in self.resolutions]
+            if isinstance(self.resolutions, list):
+                json["resolutions"] = [r.__dict__ for r in self.resolutions]
+            else:
+                del json["resolutions"]
         return json
 
 
