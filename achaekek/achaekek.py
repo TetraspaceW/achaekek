@@ -103,7 +103,7 @@ class Client:
         return self._get("/users", params=request)
 
     def create_bet(self, request: CreateBetRequest) -> requests.Response:
-        return self._post("/bet", params=request)
+        return self._post("/bet", request)
 
     def cancel_bet(self, id: str) -> requests.Response:
         return self._post(f"/bet/cancel/{id}")
