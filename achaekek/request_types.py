@@ -117,6 +117,7 @@ class CreateBetRequest(RequestModel):
     outcome: Literal["YES", "NO"] = field(default="YES")
     limitprob: float = None
     expiresAt: datetime = None
+    answerId: str = None
 
     def to_json(self):
         json = super().to_json()
