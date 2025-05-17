@@ -6,14 +6,17 @@ import logging
 from .request_types import (
     AwardBountyRequest,
     CreateCommentRequest,
+    CreateManagramRequest,
     CreateMarketRequest,
     GetBetsRequest,
     GetCommentsRequest,
     GetGroupsRequest,
     GetLeaguesRequest,
     GetManagramsRequest,
+    GetMarketsByIdRequest,
     GetMarketsRequest,
     GetPositionsRequest,
+    GetUserLimitOrdersRequest,
     GetUsersRequest,
     ModifyGroupRequest,
     ResolveMarketRequest,
@@ -26,7 +29,7 @@ from .request_types import (
 
 
 class Client:
-    def __init__(self, api_key: str, api_url: str = "https://api.manifold.markets/v0"):
+    def __init__(self, api_key: str, api_url: str = "https://api.manifold.markets"):
         """
         Creates a new Manifold client with a given API key.
 
@@ -35,7 +38,7 @@ class Client:
         api_key : str
             Your Manifold API key, which can be found in the settings on your profile.
         api_url : str, optional
-            The URL of the Manifold API. Defaults to the current production Manifold API domain, "https://api.manifold.markets/v0".
+            The URL of the Manifold API. Defaults to the current production Manifold API domain, "https://api.manifold.markets".
         """
         self.api_url = api_url
         self.api_key = api_key
@@ -44,6 +47,17 @@ class Client:
         self, endpoint: str, params: RequestModel = RequestModel()
     ) -> requests.Response:
         logging.info(f"GETting from {self.api_url}{endpoint} with {params.to_json()}")
+        return requests.get(
+            f"{self.api_url}/v0{endpoint}",
+            params=params.to_json(),
+            headers={"Authorization": f"Key {self.api_key}"},
+        )
+
+    def _get_undocumented(
+        self, endpoint: str, params: RequestModel = RequestModel()
+    ) -> requests.Response:
+        logging.info(
+            f"GETting from {self.api_url}{endpoint} with {params.to_json()}")
         return requests.get(
             f"{self.api_url}{endpoint}",
             params=params.to_json(),
@@ -183,7 +197,38 @@ class Client:
     ) -> requests.Response:
         return self._get("/managrams", params=request)
 
+    # amount shoud be > 10 unless you are a mod
+    def create_managram(self, request: CreateManagramRequest) -> requests.Response:
+        return self._post("/managram", request)
+
     def get_leagues(
         self, request: GetLeaguesRequest = GetLeaguesRequest()
     ) -> requests.Response:
         return self._get("/leagues", params=request)
+
+    def get_answers(self, market_id: str) -> requests.Response:
+        return self._get(f"/market/{market_id}/answers")
+
+    def get_answer(self, answer_id: str) -> requests.Response:
+        return self._get(f"/answer/{answer_id}")
+
+    def get_user_limit_orders_undocumented(
+        self, request: GetUserLimitOrdersRequest
+    ) -> requests.Response:
+        return self._get_undocumented(f"/get-user-limit-orders-with-contracts", params=request)
+
+    def get_market_probability(self, market_id: str) -> requests.Response:
+        return self._get(f"/market/{market_id}/prob")
+
+    def get_market_probabilities(
+        self, request: GetMarketsByIdRequest = GetMarketsByIdRequest()
+    ) -> requests.Response:
+        return self._get(f"/market-probs", params=request)
+
+    def get_markets_by_id_undocumented(
+        self, request: GetMarketsByIdRequest = GetMarketsByIdRequest()
+    ) -> requests.Response:
+        return self._get_undocumented(f"/markets-by-ids", params=request)
+
+    def request_loan(self):
+        return self._get_undocumented(f"/request-loan")
