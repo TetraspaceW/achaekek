@@ -69,7 +69,7 @@ class Client:
     ) -> requests.Response:
         logging.info(f"POSTing to {self.api_url}{endpoint} with {request.to_json()}")
         return requests.post(
-            f"{self.api_url}{endpoint}",
+            f"{self.api_url}/v0{endpoint}",
             json=request.to_json(),
             headers={"Authorization": f"Key {self.api_key}"},
         )
