@@ -4,6 +4,8 @@ from datetime import datetime
 import time
 from dataclasses import dataclass, field
 
+from requests import Request
+
 
 class OutcomeType(Enum):
     BINARY = "BINARY"
@@ -216,6 +218,12 @@ class SearchRequest(RequestModel):
 
 
 @dataclass
+class GetUserPortfolioHistoryRequest(RequestModel):
+    userId: str
+    period: Literal["daily", "weekly", "monthly", "yearly"]
+
+
+@dataclass
 class GetGroupsRequest(RequestModel):
     beforeTime: datetime | None = None
     availableToUserId: str | None = None
@@ -225,6 +233,15 @@ class GetGroupsRequest(RequestModel):
         if "beforeTime" in json:
             json["beforeTime"] = int(time.mktime(self.beforeTime.timetuple()) * 1000)
         return json
+
+
+@dataclass
+class GetUserContractMetricsWithContractsRequest(RequestModel):
+    userId: str
+    limit: int
+    offset: int | None = None
+    order: Literal["lastBetTime", "profit"] | None = None
+    perAnswer: bool | None = None
 
 
 @dataclass
@@ -391,3 +408,64 @@ class CreateManagramRequest(RequestModel):
     toIds: list[str] = field(default_factory=list)
     message: str | None = None
     token: Literal["M$", "CASH"] = "M$"
+
+
+@dataclass
+class GetTransactionsRequest(RequestModel):
+    token: Literal["MANA", "CASH"] | None = None
+    offset: int | None = None
+    limit: int | None = None
+    before: datetime | None = None
+    after: datetime | None = None
+    toId: str | None = None
+    fromId: str | None = None
+    category: str | None = None
+
+    def __post_init__(self):
+        if self.limit and self.limit > 100:
+            raise ValueError("limit must be less than or equal to 100")
+
+    def to_json(self):
+        json = super().to_json()
+        if "before" in json:
+            json["before"] = int(self.before.timestamp() * 1000)
+        if "after" in json:
+            json["after"] = int(self.after.timestamp() * 1000)
+        return json
+
+
+@dataclass
+class GetBoostHistoryRequest(RequestModel):
+    contractId: str | None = None
+    postId: str | None = None
+    userId: str | None = None
+    includePending: bool | None = None
+    limit: int | None = None
+    offset: int | None = None
+
+    def __post_init__(self):
+        if self.limit and self.limit > 1000:
+            raise ValueError("limit must be less than or equal to 1000")
+
+
+@dataclass
+class CreateMultiBetRequest(RequestModel):
+    contractId: str
+    answerIds: list[str]
+    amount: int
+    limitProb: float | None = None
+    expiresAt: datetime | None = None
+
+    def __post_init__(self):
+        if len(self.answerIds) < 2:
+            raise ValueError("answerIds must contain at least 2 elements")
+        if self.limitProb and (self.limitProb < 0.01 or self.limitProb > 0.99):
+            raise ValueError("limitProb must be between 0.01 and 0.99")
+
+    def to_json(self):
+        json = super().to_json()
+        if "expiresAt" in json:
+            json["expiresAt"] = int(self.expiresAt.timestamp() * 1000)
+        if "limitProb" in json:
+            json["limitProb"] = round(json["limitProb"], 2)
+        return json

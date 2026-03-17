@@ -3,7 +3,7 @@ name = "achaekek"
 version = "0.0.13"
 description = "Python library for the Manifold markets API."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 authors = [{ name = "TetraspaceW", email = "holomanga@gmail.com" }]
 dependencies = ["requests>=2.31.0"]
 
