@@ -1,3 +1,4 @@
+import pytest
 from datetime import datetime
 from achaekek.request_types import (
     CreateBinaryMarket,
@@ -16,7 +17,7 @@ from achaekek.request_types import (
     GetUsersRequest,
     GetLeaguesRequest,
     GetUserLimitOrdersRequest,
-    GetMarketsByIdRequest,
+    GetMarketProbabilitiesRequest,
     SearchRequest,
     AwardBountyRequest,
     ModifyGroupRequest,
@@ -505,6 +506,20 @@ def test_get_leagues_request():
     assert j == {"season": 3, "cohort": "diamond"}
 
 
+def test_get_leagues_request_user_id_only():
+    r = GetLeaguesRequest(userId="u1")
+    j = r.to_json()
+    assert j == {"userId": "u1"}
+
+
+def test_get_leagues_request_requires_user_or_season():
+    with pytest.raises(ValueError, match="userId or season"):
+        GetLeaguesRequest()
+
+    with pytest.raises(ValueError, match="userId or season"):
+        GetLeaguesRequest(cohort="diamond")
+
+
 # ── GetUserLimitOrdersRequest ──
 
 
@@ -518,15 +533,17 @@ def test_get_user_limit_orders_request():
 
 
 def test_get_markets_by_id_request():
-    r = GetMarketsByIdRequest(ids=["m1", "m2"])
+    r = GetMarketProbabilitiesRequest(ids=["m1", "m2"])
     j = r.to_json()
     assert j == {"ids": ["m1", "m2"]}
 
 
-def test_get_markets_by_id_request_default():
-    r = GetMarketsByIdRequest()
-    j = r.to_json()
-    assert j == {"ids": []}
+def test_get_market_probabilities_request_too_few_ids():
+    with pytest.raises(ValueError, match="at least 2"):
+        GetMarketProbabilitiesRequest()
+
+    with pytest.raises(ValueError, match="at least 2"):
+        GetMarketProbabilitiesRequest(ids=["only_one"])
 
 
 # ── CreateManagramRequest ──

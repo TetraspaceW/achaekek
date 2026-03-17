@@ -13,6 +13,7 @@ from .request_types import (
     GetGroupsRequest,
     GetLeaguesRequest,
     GetManagramsRequest,
+    GetMarketProbabilitiesRequest,
     GetMarketsByIdRequest,
     GetMarketsRequest,
     GetPositionsRequest,
@@ -56,8 +57,7 @@ class Client:
     def _get_undocumented(
         self, endpoint: str, params: RequestModel = RequestModel()
     ) -> requests.Response:
-        logging.info(
-            f"GETting from {self.api_url}{endpoint} with {params.to_json()}")
+        logging.info(f"GETting from {self.api_url}{endpoint} with {params.to_json()}")
         return requests.get(
             f"{self.api_url}{endpoint}",
             params=params.to_json(),
@@ -184,9 +184,7 @@ class Client:
     def create_comment(self, comment: CreateCommentRequest) -> requests.Response:  #
         return self._post("/comment", comment)
 
-    def get_comments(
-        self, request: GetCommentsRequest = GetCommentsRequest()
-    ) -> requests.Response:
+    def get_comments(self, request: GetCommentsRequest) -> requests.Response:
         return self._get("/comments", params=request)
 
     def get_bets(self, request: GetBetsRequest = GetBetsRequest()) -> requests.Response:
@@ -201,9 +199,7 @@ class Client:
     def create_managram(self, request: CreateManagramRequest) -> requests.Response:
         return self._post("/managram", request)
 
-    def get_leagues(
-        self, request: GetLeaguesRequest = GetLeaguesRequest()
-    ) -> requests.Response:
+    def get_leagues(self, request: GetLeaguesRequest) -> requests.Response:
         return self._get("/leagues", params=request)
 
     def get_answers(self, market_id: str) -> requests.Response:
@@ -215,18 +211,35 @@ class Client:
     def get_user_limit_orders_undocumented(
         self, request: GetUserLimitOrdersRequest
     ) -> requests.Response:
-        return self._get_undocumented(f"/get-user-limit-orders-with-contracts", params=request)
+        return self._get_undocumented(
+            f"/get-user-limit-orders-with-contracts", params=request
+        )
 
     def get_market_probability(self, market_id: str) -> requests.Response:
         return self._get(f"/market/{market_id}/prob")
 
     def get_market_probabilities(
-        self, request: GetMarketsByIdRequest = GetMarketsByIdRequest()
+        self,
+        request: GetMarketProbabilitiesRequest,
     ) -> requests.Response:
+        """
+        Gets the probabilities for a list of markets.
+
+        Parameters
+        ----------
+        request : GetMarketsByIdRequest
+            An array of two or more market IDs.
+
+        Returns
+        -------
+        requests.Response
+            The response from the Manifold API.
+        """
         return self._get(f"/market-probs", params=request)
 
     def get_markets_by_id_undocumented(
-        self, request: GetMarketsByIdRequest = GetMarketsByIdRequest()
+        self,
+        request: GetMarketsByIdRequest = GetMarketsByIdRequest(),
     ) -> requests.Response:
         return self._get_undocumented(f"/markets-by-ids", params=request)
 

@@ -182,6 +182,14 @@ class GetCommentsRequest(RequestModel):
     page: int | None = None
     userId: str | None = None
 
+    def __post_init__(self):
+        if (
+            self.contractId is None
+            and self.contractSlug is None
+            and self.userId is None
+        ):
+            raise ValueError("contractId, contractSlug or userId is required")
+
 
 @dataclass
 class SearchRequest(RequestModel):
@@ -349,6 +357,10 @@ class GetLeaguesRequest(RequestModel):
     season: int | None = None
     cohort: str | None = None
 
+    def __post_init__(self):
+        if self.userId is None and self.season is None:
+            raise ValueError("at least one of userId or season is required")
+
 
 @dataclass
 class GetUserLimitOrdersRequest(RequestModel):
@@ -357,6 +369,15 @@ class GetUserLimitOrdersRequest(RequestModel):
     includeExpired: bool | None = None
     includeCancelled: bool | None = None
     includeFilled: bool | None = None
+
+
+@dataclass
+class GetMarketProbabilitiesRequest(RequestModel):
+    ids: list[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        if len(self.ids) < 2:
+            raise ValueError("ids must contain at least 2 elements")
 
 
 @dataclass
