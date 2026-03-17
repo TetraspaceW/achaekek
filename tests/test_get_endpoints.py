@@ -1,20 +1,7 @@
 import os
 import pytest
 from achaekek import Client
-from achaekek.request_types import (
-    GetBetsRequest,
-    GetCommentsRequest,
-    GetGroupsRequest,
-    GetLeaguesRequest,
-    GetManagramsRequest,
-    GetMarketProbabilitiesRequest,
-    GetMarketsByIdRequest,
-    GetMarketsRequest,
-    GetPositionsRequest,
-    GetUserLimitOrdersRequest,
-    GetUsersRequest,
-    SearchRequest,
-)
+from achaekek.request_types import *
 
 API_KEY = os.environ.get("MANIFOLD_API_KEY", "")
 
@@ -78,10 +65,41 @@ def test_get_user(client: Client, me):
     assert r.json()["id"] == me["id"]
 
 
+def test_get_user_lite(client: Client, me):
+    r = client.get_user(me["username"], lite=True)
+    assert r.status_code == 200
+    assert r.json()["id"] == me["id"]
+
+
 def test_get_user_by_id(client: Client, me):
     r = client.get_user_by_id(me["id"])
     assert r.status_code == 200
     assert r.json()["username"] == me["username"]
+
+
+def test_get_user_by_id_lite(client: Client, me):
+    r = client.get_user_by_id(me["id"], lite=True)
+    assert r.status_code == 200
+    assert r.json()["id"] == me["id"]
+
+
+def test_get_user_portfolio(client: Client, me):
+    r = client.get_user_portfolio(GetUserPortfolioRequest(userId=me["id"]))
+    assert r.status_code == 200
+
+
+def test_get_user_portfolio_history(client: Client, me):
+    r = client.get_user_portfolio_history(
+        GetUserPortfolioHistoryRequest(userId=me["id"], period="monthly")
+    )
+    assert r.status_code == 200
+
+
+def test_get_user_contract_metrics_with_contracts(client: Client, me):
+    r = client.get_user_contract_metrics_with_contracts(
+        GetUserContractMetricsWithContractsRequest(userId=me["id"], limit=5)
+    )
+    assert r.status_code == 200
 
 
 def test_get_users(client: Client):
@@ -230,26 +248,26 @@ def test_get_leagues_by_user(client: Client, me):
     assert r.status_code == 200
 
 
-# ── Answers ──
+# ── Transactions ──
 
 
-def test_get_answers(client: Client, some_mc_market):
-    r = client.get_answers(some_mc_market["id"])
+def test_get_transactions(client: Client):
+    r = client.get_transactions(GetTransactionsRequest(limit=5))
     assert r.status_code == 200
-    answers = r.json()
-    assert isinstance(answers, list)
+    assert isinstance(r.json(), list)
 
 
-def test_get_answer(client: Client, some_mc_market):
-    answers_resp = client.get_answers(some_mc_market["id"])
-    if answers_resp.status_code != 200:
-        pytest.skip("could not fetch answers")
-    answers = answers_resp.json()
-    if not answers:
-        pytest.skip("no answers on market")
-    r = client.get_answer(answers[0]["id"])
+def test_get_transactions_by_token(client: Client):
+    r = client.get_transactions(GetTransactionsRequest(token="MANA", limit=3))
     assert r.status_code == 200
-    assert r.json()["id"] == answers[0]["id"]
+
+
+# ── Boost history ──
+
+
+def test_get_boost_history(client: Client):
+    r = client.get_boost_history(GetBoostHistoryRequest(limit=5))
+    assert r.status_code == 200
 
 
 # ── Undocumented endpoints ──

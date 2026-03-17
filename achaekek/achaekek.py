@@ -23,13 +23,13 @@ from .request_types import (
     GetUserContractMetricsWithContractsRequest,
     GetUserLimitOrdersRequest,
     GetUserPortfolioHistoryRequest,
+    GetUserPortfolioRequest,
     GetUsersRequest,
     ModifyGroupRequest,
     ResolveMarketRequest,
     SearchRequest,
     CreateBetRequest,
     RequestModel,
-    SellSharesDPMRequest,
     SellSharesRequest,
 )
 
@@ -90,8 +90,8 @@ class Client:
     def get_me(self) -> requests.Response:
         return self._get("/me")
 
-    def get_user_portfolio(self, user_id: str) -> requests.Response:
-        return self._get("/get-user-portfolio", params={"userId": user_id})
+    def get_user_portfolio(self, request: GetUserPortfolioRequest) -> requests.Response:
+        return self._get("/get-user-portfolio", params=request)
 
     def get_user_portfolio_history(
         self, request: GetUserPortfolioHistoryRequest
@@ -223,11 +223,6 @@ class Client:
     ) -> requests.Response:
         return self._post(f"/market/{market_id}/sell", request)
 
-    def sell_shares_dpm(
-        self, market_id: str, request: SellSharesDPMRequest
-    ) -> requests.Response:
-        return self._post(f"/sell-shares-dpm", request)
-
     def create_comment(self, comment: CreateCommentRequest) -> requests.Response:  #
         return self._post("/comment", comment)
 
@@ -275,9 +270,6 @@ class Client:
 
     def request_loan(self):
         return self._get_undocumented(f"/request-loan")
-
-    def get_answers(self, market_id: str) -> requests.Response:
-        return self._get_undocumented(f"/market/{market_id}/answers")
 
     def get_answer(self, answer_id: str) -> requests.Response:
         return self._get_undocumented(f"/answer/{answer_id}")

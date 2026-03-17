@@ -1,36 +1,6 @@
 import pytest
 from datetime import datetime
-from achaekek.request_types import (
-    CreateBinaryMarket,
-    CreatePseudoNumericMarket,
-    CreateMultipleChoiceMarket,
-    CreatePollMarket,
-    CreateBountiedQuestionMarket,
-    CreateBetRequest,
-    CreateCommentRequest,
-    GetGroupsRequest,
-    GetManagramsRequest,
-    GetMarketsRequest,
-    GetBetsRequest,
-    GetCommentsRequest,
-    GetPositionsRequest,
-    GetUsersRequest,
-    GetLeaguesRequest,
-    GetUserLimitOrdersRequest,
-    GetMarketProbabilitiesRequest,
-    SearchRequest,
-    AwardBountyRequest,
-    ModifyGroupRequest,
-    ResolveBinaryMarket,
-    ResolveMultipleChoiceMarket,
-    ResolveNumericMarket,
-    MultipleChoiceResolution,
-    SellSharesRequest,
-    SellSharesDPMRequest,
-    CreateManagramRequest,
-    RequestModel,
-    DescriptionFormat,
-)
+from achaekek.request_types import *
 import time
 
 
@@ -427,11 +397,6 @@ def test_sell_shares_request():
     assert j == {"outcome": "YES", "shares": 10, "answerId": "a1"}
 
 
-def test_sell_shares_request_empty():
-    r = SellSharesRequest()
-    assert r.to_json() == {}
-
-
 # ── SellSharesDPMRequest ──
 
 
@@ -564,3 +529,176 @@ def test_create_managram_request_cash():
     r = CreateManagramRequest(amount=50, toIds=["u1"], token="CASH")
     j = r.to_json()
     assert j["token"] == "CASH"
+
+
+# ── GetCommentsRequest validation ──
+
+
+def test_get_comments_request_requires_identifier():
+    with pytest.raises(ValueError, match="contractId, contractSlug or userId"):
+        GetCommentsRequest()
+
+    with pytest.raises(ValueError, match="contractId, contractSlug or userId"):
+        GetCommentsRequest(limit=10)
+
+
+def test_get_comments_request_contract_slug():
+    r = GetCommentsRequest(contractSlug="my-market")
+    j = r.to_json()
+    assert j == {"contractSlug": "my-market"}
+
+
+def test_get_comments_request_user_id():
+    r = GetCommentsRequest(userId="u1", limit=5)
+    j = r.to_json()
+    assert j == {"userId": "u1", "limit": 5}
+
+
+# ── GetUserPortfolioHistoryRequest ──
+
+
+def test_get_user_portfolio_history_request():
+    r = GetUserPortfolioHistoryRequest(userId="u1", period="daily")
+    j = r.to_json()
+    assert j == {"userId": "u1", "period": "daily"}
+
+
+# ── GetUserContractMetricsWithContractsRequest ──
+
+
+def test_get_user_contract_metrics_request_minimal():
+    r = GetUserContractMetricsWithContractsRequest(userId="u1", limit=10)
+    j = r.to_json()
+    assert j == {"userId": "u1", "limit": 10}
+
+
+def test_get_user_contract_metrics_request_full():
+    r = GetUserContractMetricsWithContractsRequest(
+        userId="u1", limit=10, offset=5, order="profit", perAnswer=True
+    )
+    j = r.to_json()
+    assert j == {
+        "userId": "u1",
+        "limit": 10,
+        "offset": 5,
+        "order": "profit",
+        "perAnswer": True,
+    }
+
+
+# ── GetTransactionsRequest ──
+
+
+def test_get_transactions_request_minimal():
+    r = GetTransactionsRequest()
+    assert r.to_json() == {}
+
+
+def test_get_transactions_request_with_dates():
+    before = datetime(2025, 6, 1, 0, 0, 0)
+    after = datetime(2025, 1, 1, 0, 0, 0)
+    r = GetTransactionsRequest(token="MANA", before=before, after=after, limit=50)
+    j = r.to_json()
+    assert j["token"] == "MANA"
+    assert j["before"] == int(before.timestamp() * 1000)
+    assert j["after"] == int(after.timestamp() * 1000)
+    assert j["limit"] == 50
+
+
+def test_get_transactions_request_limit_validation():
+    with pytest.raises(ValueError, match="less than or equal to 100"):
+        GetTransactionsRequest(limit=101)
+
+
+def test_get_transactions_request_limit_at_boundary():
+    r = GetTransactionsRequest(limit=100)
+    assert r.to_json() == {"limit": 100}
+
+
+# ── GetBoostHistoryRequest ──
+
+
+def test_get_boost_history_request_minimal():
+    r = GetBoostHistoryRequest()
+    assert r.to_json() == {}
+
+
+def test_get_boost_history_request_full():
+    r = GetBoostHistoryRequest(
+        contractId="c1", userId="u1", includePending=True, limit=500, offset=10
+    )
+    j = r.to_json()
+    assert j == {
+        "contractId": "c1",
+        "userId": "u1",
+        "includePending": True,
+        "limit": 500,
+        "offset": 10,
+    }
+
+
+def test_get_boost_history_request_limit_validation():
+    with pytest.raises(ValueError, match="less than or equal to 1000"):
+        GetBoostHistoryRequest(limit=1001)
+
+
+def test_get_boost_history_request_limit_at_boundary():
+    r = GetBoostHistoryRequest(limit=1000)
+    assert r.to_json() == {"limit": 1000}
+
+
+# ── CreateMultiBetRequest ──
+
+
+def test_create_multi_bet_request_minimal():
+    r = CreateMultiBetRequest(contractId="c1", answerIds=["a1", "a2"], amount=100)
+    j = r.to_json()
+    assert j == {"contractId": "c1", "answerIds": ["a1", "a2"], "amount": 100}
+
+
+def test_create_multi_bet_request_with_limit_prob():
+    r = CreateMultiBetRequest(
+        contractId="c1", answerIds=["a1", "a2"], amount=100, limitProb=0.12345
+    )
+    j = r.to_json()
+    assert j["limitProb"] == 0.12
+
+
+def test_create_multi_bet_request_with_expires_at():
+    dt = datetime(2025, 6, 1, 12, 0, 0)
+    r = CreateMultiBetRequest(
+        contractId="c1", answerIds=["a1", "a2"], amount=100, expiresAt=dt
+    )
+    j = r.to_json()
+    assert j["expiresAt"] == int(dt.timestamp() * 1000)
+
+
+def test_create_multi_bet_request_too_few_answers():
+    with pytest.raises(ValueError, match="at least 2"):
+        CreateMultiBetRequest(contractId="c1", answerIds=["a1"], amount=100)
+
+
+def test_create_multi_bet_request_limit_prob_too_low():
+    with pytest.raises(ValueError, match="between 0.01 and 0.99"):
+        CreateMultiBetRequest(
+            contractId="c1", answerIds=["a1", "a2"], amount=100, limitProb=0.001
+        )
+
+
+def test_create_multi_bet_request_limit_prob_too_high():
+    with pytest.raises(ValueError, match="between 0.01 and 0.99"):
+        CreateMultiBetRequest(
+            contractId="c1", answerIds=["a1", "a2"], amount=100, limitProb=0.999
+        )
+
+
+def test_create_multi_bet_request_limit_prob_boundaries():
+    r1 = CreateMultiBetRequest(
+        contractId="c1", answerIds=["a1", "a2"], amount=100, limitProb=0.01
+    )
+    assert r1.to_json()["limitProb"] == 0.01
+
+    r2 = CreateMultiBetRequest(
+        contractId="c1", answerIds=["a1", "a2"], amount=100, limitProb=0.99
+    )
+    assert r2.to_json()["limitProb"] == 0.99

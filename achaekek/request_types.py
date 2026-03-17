@@ -4,8 +4,6 @@ from datetime import datetime
 import time
 from dataclasses import dataclass, field
 
-from requests import Request
-
 
 class OutcomeType(Enum):
     BINARY = "BINARY"
@@ -326,7 +324,7 @@ ResolveMarketRequest = (
 
 @dataclass
 class SellSharesRequest(RequestModel):
-    outcome: Literal["YES", "NO"] | None = None
+    outcome: Literal["YES", "NO"]
     shares: int | None = None
     answerId: str | None = None
 
@@ -469,3 +467,8 @@ class CreateMultiBetRequest(RequestModel):
         if "limitProb" in json:
             json["limitProb"] = round(json["limitProb"], 2)
         return json
+
+
+@dataclass
+class GetUserPortfolioRequest(RequestModel):
+    userId: str
