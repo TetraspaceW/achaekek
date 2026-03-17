@@ -117,6 +117,7 @@ class CreateBetRequest(RequestModel):
     outcome: Literal["YES", "NO"] = field(default="YES")
     limitprob: float = None
     expiresAt: datetime = None
+    answerId: str = None
 
     def to_json(self):
         json = super().to_json()
@@ -335,3 +336,25 @@ class GetLeaguesRequest(RequestModel):
     userId: str = None
     season: int = None
     cohort: str = None
+
+
+@dataclass
+class GetUserLimitOrdersRequest(RequestModel):
+    userId: str = None
+    count: int = None
+    includeExpired: bool | None = None
+    includeCancelled: bool | None = None
+    includeFilled: bool | None = None
+
+
+@dataclass
+class GetMarketsByIdRequest(RequestModel):
+    ids: list[str] = field(default_factory=list)
+
+
+@dataclass
+class CreateManagramRequest(RequestModel):
+    amount: int
+    toIds: list[str] = field(default_factory=list)
+    message: str = None
+    token: Literal["M$", "CASH"] = "M$"
