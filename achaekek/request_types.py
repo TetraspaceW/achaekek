@@ -22,11 +22,11 @@ class DescriptionFormat(Enum):
 @dataclass(kw_only=True)
 class _CreateMarket:
     question: str
-    closeTime: datetime = None
-    description: str | tuple[str, DescriptionFormat] = None
-    visibility: Literal["public", "unlisted"] = None
-    groupIds: list[str] = None
-    extraLiquidity: int = None
+    closeTime: datetime | None = None
+    description: str | tuple[str, DescriptionFormat] | None = None
+    visibility: Literal["public", "unlisted"] | None = None
+    groupIds: list[str] | None = None
+    extraLiquidity: int | None = None
 
     def to_json(self):
         """
@@ -42,7 +42,7 @@ class _CreateMarket:
         if "outcomeType" in json:
             json["outcomeType"] = self.outcomeType.value
         if "closeTime" in json:
-            json["closeTime"] = int(time.mktime(self.closeTime.timetuple()) * 1000)
+            json["closeTime"] = int(self.closeTime.timestamp() * 1000)
         if "description" in json and isinstance(self.description, tuple):
             json[self.description[1].value] = self.description[0]
             del json["description"]
@@ -105,6 +105,7 @@ CreateMarketRequest = (
 )
 
 
+@dataclass
 class RequestModel:
     def to_json(self):
         return {k: v for k, v in self.__dict__.items() if v is not None}
@@ -115,16 +116,16 @@ class CreateBetRequest(RequestModel):
     amount: int
     contractId: str
     outcome: Literal["YES", "NO"] = field(default="YES")
-    limitprob: float = None
-    expiresAt: datetime = None
-    answerId: str = None
+    limitprob: float | None = None
+    expiresAt: datetime | None = None
+    answerId: str | None = None
 
     def to_json(self):
         json = super().to_json()
         if "limitprob" in json:
             json["limitprob"] = round(json["limitprob"], 2)
         if "expiresAt" in json:
-            json["expiresAt"] = int(time.mktime(self.expiresAt.timetuple()) * 1000)
+            json["expiresAt"] = int(self.expiresAt.timestamp() * 1000)
         return json
 
 
@@ -149,56 +150,67 @@ class GetMarketsRequest(RequestModel):
         Optional. Include only markets tagged with this topic.
     """
 
-    limit: int = None
-    sort: Literal[
-        "created-time", "updated-time", "last-bet-time", "last-comment-time"
-    ] = None
-    order: Literal["asc", "desc"] = None
-    before: str = None
-    userId: str = None
-    groupId: str = None
+    limit: int | None = None
+    sort: (
+        Literal["created-time", "updated-time", "last-bet-time", "last-comment-time"]
+        | None
+    ) = None
+    order: Literal["asc", "desc"] | None = None
+    before: str | None = None
+    userId: str | None = None
+    groupId: str | None = None
 
 
 @dataclass
 class GetBetsRequest(RequestModel):
-    userId: str = None
-    username: str = None
-    contractId: str = None
-    contractSlug: str = None
-    limit: int = None
-    before: str = None
-    after: str = None
-    kinds: Literal["open-limit"] = None
-    order: Literal["asc", "desc"] = None
+    userId: str | None = None
+    username: str | None = None
+    contractId: str | None = None
+    contractSlug: str | None = None
+    limit: int | None = None
+    before: str | None = None
+    after: str | None = None
+    kinds: Literal["open-limit"] | None = None
+    order: Literal["asc", "desc"] | None = None
 
 
 @dataclass
 class GetCommentsRequest(RequestModel):
-    contractId: str = None
-    contractSlug: str = None
-    limit: int = None
-    page: int = None
-    userId: str = None
+    contractId: str | None = None
+    contractSlug: str | None = None
+    limit: int | None = None
+    page: int | None = None
+    userId: str | None = None
 
 
 @dataclass
 class SearchRequest(RequestModel):
     term: str
-    sort: Literal["score", "newest", "liquidity"] = None
-    filter: Literal[
-        "all", "open", "closed", "resolved", "closing-this-month", "closing-next-month"
-    ] = None
-    contractType: Literal["ALL", "BINARY", "MULTIPLE_CHOICE", "BOUNTY", "POLL"] = None
-    topicSlug: str = None
-    creatorId: str = None
-    limit: int = None
-    offset: int = None
+    sort: Literal["score", "newest", "liquidity"] | None = None
+    filter: (
+        Literal[
+            "all",
+            "open",
+            "closed",
+            "resolved",
+            "closing-this-month",
+            "closing-next-month",
+        ]
+        | None
+    ) = None
+    contractType: (
+        Literal["ALL", "BINARY", "MULTIPLE_CHOICE", "BOUNTY", "POLL"] | None
+    ) = None
+    topicSlug: str | None = None
+    creatorId: str | None = None
+    limit: int | None = None
+    offset: int | None = None
 
 
 @dataclass
 class GetGroupsRequest(RequestModel):
-    beforeTime: datetime = None
-    availableToUserId: str = None
+    beforeTime: datetime | None = None
+    availableToUserId: str | None = None
 
     def to_json(self):
         json = super().to_json()
@@ -209,16 +221,16 @@ class GetGroupsRequest(RequestModel):
 
 @dataclass
 class GetPositionsRequest(RequestModel):
-    order: Literal["shares", "profit"] = None
-    top: int = None
-    bottom: int = None
-    userId: str = None
+    order: Literal["shares", "profit"] | None = None
+    top: int | None = None
+    bottom: int | None = None
+    userId: str | None = None
 
 
 @dataclass
 class GetUsersRequest(RequestModel):
-    limit: int = None
-    before: str = None
+    limit: int | None = None
+    before: str | None = None
 
 
 @dataclass
@@ -229,14 +241,14 @@ class AwardBountyRequest(RequestModel):
 
 @dataclass
 class ModifyGroupRequest(RequestModel):
-    groupId: str
-    remove: bool = None
+    groupId: str | None = None
+    remove: bool | None = None
 
 
 @dataclass
 class ResolveBinaryMarket(RequestModel):
     outcome: Literal["YES", "NO", "MKT", "CANCEL"]
-    probabilityInt: int = None
+    probabilityInt: int | None = None
 
 
 @dataclass
@@ -248,7 +260,7 @@ class MultipleChoiceResolution:
 @dataclass
 class ResolveMultipleChoiceMarket(RequestModel):
     outcome: Literal["MKT", "CANCEL"] | int
-    resolutions: list[MultipleChoiceResolution] = None
+    resolutions: list[MultipleChoiceResolution] | None = None
 
     def to_json(self):
         json = super().to_json()
@@ -278,8 +290,8 @@ class ResolveNumericMarket(RequestModel):
     """
 
     outcome: Literal["CANCEL"] | int
-    value: float = None
-    probabilityInt: float = None
+    value: float | None = None
+    probabilityInt: float | None = None
 
 
 ResolveMarketRequest = (
@@ -289,21 +301,21 @@ ResolveMarketRequest = (
 
 @dataclass
 class SellSharesRequest(RequestModel):
-    outcome: Literal["YES", "NO"] = None
-    shares: int = None
-    answerId: str = None
+    outcome: Literal["YES", "NO"] | None = None
+    shares: int | None = None
+    answerId: str | None = None
 
 
 @dataclass
 class SellSharesDPMRequest(RequestModel):
-    contractId: str = None
-    betId: str = None
+    contractId: str | None = None
+    betId: str | None = None
 
 
 @dataclass
 class CreateCommentRequest(RequestModel):
     contractId: str
-    description: str | tuple[str, Literal["content", "html", "markdown"]] = None
+    description: str | tuple[str, Literal["content", "html", "markdown"]] | None = None
 
     def to_json(self):
         json = super().to_json()
@@ -316,32 +328,32 @@ class CreateCommentRequest(RequestModel):
 
 @dataclass
 class GetManagramsRequest(RequestModel):
-    toId: str = None
-    fromId: str = None
-    limit: int = None
-    before: datetime = None
-    after: datetime = None
+    toId: str | None = None
+    fromId: str | None = None
+    limit: int | None = None
+    before: datetime | None = None
+    after: datetime | None = None
 
     def to_json(self):
         json = super().to_json()
         if "before" in json:
-            json["before"] = int(time.mktime(self.before.timetuple()) * 1000)
+            json["before"] = int(self.before.timestamp() * 1000)
         if "after" in json:
-            json["after"] = int(time.mktime(self.after.timetuple()) * 1000)
+            json["after"] = int(self.after.timestamp() * 1000)
         return json
 
 
 @dataclass
 class GetLeaguesRequest(RequestModel):
-    userId: str = None
-    season: int = None
-    cohort: str = None
+    userId: str | None = None
+    season: int | None = None
+    cohort: str | None = None
 
 
 @dataclass
 class GetUserLimitOrdersRequest(RequestModel):
-    userId: str = None
-    count: int = None
+    userId: str | None = None
+    count: int | None = None
     includeExpired: bool | None = None
     includeCancelled: bool | None = None
     includeFilled: bool | None = None
@@ -356,5 +368,5 @@ class GetMarketsByIdRequest(RequestModel):
 class CreateManagramRequest(RequestModel):
     amount: int
     toIds: list[str] = field(default_factory=list)
-    message: str = None
+    message: str | None = None
     token: Literal["M$", "CASH"] = "M$"
