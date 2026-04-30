@@ -163,14 +163,17 @@ def test_create_bet_request_minimal():
     assert j["amount"] == 100
     assert j["contractId"] == "abc123"
     assert j["outcome"] == "YES"
-    assert "limitprob" not in j
+    assert "limitProb" not in j
     assert "expiresAt" not in j
 
 
 def test_create_bet_request_limitprob_rounding():
-    r = CreateBetRequest(amount=10, contractId="c1", limitprob=0.12345)
+    r = CreateBetRequest(amount=10, contractId="c1", limitProb=0.12345)
     j = r.to_json()
-    assert j["limitprob"] == 0.12
+    assert j["limitProb"] == 0.12
+    # The Manifold API rejects the lowercase `limitprob` key with 400; make
+    # sure we never accidentally serialise it under the old name again.
+    assert "limitprob" not in j
 
 
 def test_create_bet_request_expires_at():
