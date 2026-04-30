@@ -116,14 +116,14 @@ class CreateBetRequest(RequestModel):
     amount: int
     contractId: str
     outcome: Literal["YES", "NO"] = field(default="YES")
-    limitprob: float | None = None
+    limitProb: float | None = None
     expiresAt: datetime | None = None
     answerId: str | None = None
 
     def to_json(self):
         json = super().to_json()
-        if "limitprob" in json:
-            json["limitprob"] = round(json["limitprob"], 2)
+        if "limitProb" in json:
+            json["limitProb"] = round(json["limitProb"], 2)
         if "expiresAt" in json:
             json["expiresAt"] = int(self.expiresAt.timestamp() * 1000)
         return json
